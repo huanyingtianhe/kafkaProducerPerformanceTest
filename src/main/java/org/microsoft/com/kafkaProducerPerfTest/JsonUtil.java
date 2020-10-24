@@ -60,4 +60,24 @@ public class JsonUtil {
         logger.info(partitions);
         return partitions;
     }
+
+    public ArrayList<String> getTopics(){
+        ArrayList<String> topicsR = new ArrayList<>();
+        JSONParser parser = new JSONParser();
+        try {
+            Object obj = parser.parse(new FileReader("conf.json"));
+            JSONObject jsonObject = (JSONObject) obj;
+            String topics = (String)jsonObject.get("topics");
+            String[] topicArray = topics.split(",");
+            for(String topic : topicArray){
+                topicsR.add(topic.trim());
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        logger.info(topicsR);
+        return topicsR;
+    }
 }

@@ -7,6 +7,7 @@ import org.apache.commons.cli.*;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
@@ -64,6 +65,7 @@ public class PorducerPerfTest {
         //String brokers = "10.230.197.147:9092,10.230.197.146:9092,10.230.197.145:9092,10.230.197.144:9092,10.230.197.143:9092,10.230.197.142:9092,10.230.197.141:9092,10.230.197.140:9092,10.230.197.139:9092,10.230.197.138:9092,10.230.197.137:9092,10.230.197.136:9092,10.230.197.135:9092,10.230.197.134:9092,10.230.197.133:9092,10.230.197.131:9092,10.230.197.129:9092,10.230.197.128:9092,10.230.197.127:9092,10.230.197.126:9092,10.230.197.125:9092,10.230.197.124:9092,10.230.197.123:9092,10.230.197.122:9092,10.230.197.121:9092,10.230.197.120:9092,10.230.197.119:9092,10.230.197.118:9092,10.230.197.113:9092,10.230.197.112:9092";
         JsonUtil jsonUtil = new JsonUtil();
         String brokers = jsonUtil.getBrokers();
+        ArrayList<String> topics = jsonUtil.getTopics();
         Properties props = new Properties();
         props.setProperty("metadata.broker.list", brokers);
         props.setProperty("compression.codec", "gzip");
@@ -86,15 +88,18 @@ public class PorducerPerfTest {
             if(isdebug){
                 logger.debug("send data: key " + ip + ", value: " + msg);
             }
-            if(isSendtoKafka) {
-                KeyedMessage<String, String> data = new KeyedMessage<String, String>("test5", ip, msg);
-                producer.send(data);
-            }else{
-                mp.postMessage("test5", ip);
+            for(String topic : topics) {
+                if(isSendtoKafka) {
+                    KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic, ip, msg);
+                    producer.send(data);
+                }else{
+                    mp.postMessage(topic, ip);
+                }
             }
+
         }
         long endTime = System.currentTimeMillis();
-        long bytes = events * bit / 8;
+        long bytes = topics.size() * events * bit / 8;
         logger.info("run time：" + (endTime - startTime) + "ms, speed: " + bytes * 1000 / (endTime - startTime) + " byte/s");
         producer.close();
     }
