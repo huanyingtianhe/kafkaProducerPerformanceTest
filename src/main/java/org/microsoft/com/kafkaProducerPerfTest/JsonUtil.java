@@ -70,8 +70,8 @@ public class JsonUtil {
     }
 
     public boolean isSync(){
-          String sync = (String)configs.getOrDefault("sync", "true");
-          return sync.equals("true");
+          String sync = (String)configs.getOrDefault("producer.type", "sync");
+          return sync.equals("sync");
     }
 
     public void importProperties(){
