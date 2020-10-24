@@ -1,1 +1,3 @@
+org\microsoft\com\kafkaProducerPerfTest\ProducerThread.class
+org\microsoft\com\kafkaProducerPerfTest\CmdConfig.class
 org\microsoft\com\kafkaProducerPerfTest\JsonUtil.class

@@ -9,32 +9,31 @@ import org.json.simple.parser.ParseException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JsonUtil {
     Logger logger = org.apache.log4j.Logger.getLogger(JsonUtil.class.getName());
+    Map<String, Object> configs= new HashMap<>();
+    JsonUtil(){
+        importProperties();
+    }
     public String getBrokers(){
-        String brokers="";
-        JSONParser parser = new JSONParser();
-        try {
-            Object obj = parser.parse(new FileReader("conf.json"));
-            JSONObject jsonObject = (JSONObject) obj;
-            brokers = (String)jsonObject.get("brokers");
-        }catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        String brokers = (String)configs.get("brokers");
         logger.info(brokers);
         return brokers;
+    }
+
+    public String getProperty(String name, String defaultValue){
+        return (String)configs.getOrDefault(name, defaultValue);
     }
 
     public ArrayList<Integer> getPartitions(){
         ArrayList<Integer> partitions = new ArrayList<>();
         JSONParser parser = new JSONParser();
         try {
-            Object obj = parser.parse(new FileReader("conf.json"));
-            JSONObject jsonObject =  (JSONObject) obj;
-            JSONArray partitionsArray = (JSONArray)jsonObject.get("partitions");
+            JSONArray partitionsArray = (JSONArray)configs.get("partitions");
             for(Object o : partitionsArray){
                 String part = (String)o;
                 if(part.contains("-")){
@@ -54,8 +53,6 @@ public class JsonUtil {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
         }
         logger.info(partitions);
         return partitions;
@@ -63,21 +60,31 @@ public class JsonUtil {
 
     public ArrayList<String> getTopics(){
         ArrayList<String> topicsR = new ArrayList<>();
+        String topics = (String) configs.get("topics");
+        String[] topicArray = topics.split(",");
+        for (String topic : topicArray) {
+            topicsR.add(topic.trim());
+        }
+        logger.info(topicsR);
+        return topicsR;
+    }
+
+    public boolean isSync(){
+          String sync = (String)configs.getOrDefault("sync", "true");
+          return sync.equals("true");
+    }
+
+    public void importProperties(){
+
         JSONParser parser = new JSONParser();
         try {
             Object obj = parser.parse(new FileReader("conf.json"));
             JSONObject jsonObject = (JSONObject) obj;
-            String topics = (String)jsonObject.get("topics");
-            String[] topicArray = topics.split(",");
-            for(String topic : topicArray){
-                topicsR.add(topic.trim());
-            }
+            configs = (Map<String, Object>)jsonObject;
         }catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        logger.info(topicsR);
-        return topicsR;
     }
 }
